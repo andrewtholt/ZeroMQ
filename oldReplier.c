@@ -22,10 +22,11 @@ int main(void) {
         printf("Received request: %s\n", buffer);
 
         // Do some 'work'
-        sleep(1);
+        sleep(0.5);
 
         // Send reply back to client
-        char *reply_message = "World";
+//        char *reply_message = "World";
+        char *reply_message = "{ }";
         zmq_send(responder, reply_message, strlen(reply_message), 0);
         printf("Sent reply: %s\n", reply_message);
     }
