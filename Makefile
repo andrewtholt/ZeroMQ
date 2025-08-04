@@ -6,18 +6,18 @@ RM = rm -f
 
 all: requester replier ps_publisher ps_subscriber
 
-requester: requester.c
+requester: requester.cpp
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
 
-replier: replier.c
+replier: replier.cpp
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
 
 
 
-ps_publisher: ps_publisher.c
+ps_publisher: ps_publisher.cpp
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
 
-ps_subscriber: ps_subscriber.c
+ps_subscriber: ps_subscriber.cpp
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
 
 clean:
