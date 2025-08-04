@@ -1,2 +1,2 @@
 # ZeroMQ
-Some experements withe ZeorMQ
+Some experements withe ZeroMQ
