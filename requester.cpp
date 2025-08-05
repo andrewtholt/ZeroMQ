@@ -6,6 +6,8 @@
 #include <iostream> // For std::cout
 #include <vector>
 #include <map>
+#include "nlohmann/json.hpp"
+//#include "single_include/nlohmann/json.hpp"
 
 using namespace std;
 map<string,string> statusRecord;

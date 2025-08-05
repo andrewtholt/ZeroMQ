@@ -1,10 +1,10 @@
 CC = g++
 # CC = gcc
-CFLAGS = -Wall -g
+CFLAGS = -Wall -g -I.
 LDFLAGS = -lzmq
 RM = rm -f
 
-all: requester replier ps_publisher ps_subscriber
+all: requester replier ps_publisher ps_subscriber jsonTest
 
 requester: requester.cpp
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
@@ -22,3 +22,6 @@ ps_subscriber: ps_subscriber.cpp
 
 clean:
 	$(RM) requester replier ps_publisher ps_subscriber
+
+jsonTest: jsonTest.cpp
+	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
