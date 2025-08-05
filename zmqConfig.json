@@ -12,7 +12,7 @@
 	},
 	"OUTPUT" : {
 		"ADDRESS" : "127.0.0.1",
-		"PORT" : 1234,
+		"PORT" : 1235,
 		"MOTOR" : {
 			"VALUE" : false
 		},

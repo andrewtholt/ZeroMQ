@@ -7,7 +7,6 @@
 #include <vector>
 #include <map>
 #include "nlohmann/json.hpp"
-//#include "single_include/nlohmann/json.hpp"
 
 using namespace std;
 map<string,string> statusRecord;
@@ -30,7 +29,6 @@ int main(void) {
     }
 
     for (int request_nbr = 0; request_nbr < 5; request_nbr++) {
-//        const char *request_message = "STATUS";
         char request_message[10];
         memset(request_message,0,6);
         strcpy(request_message,"STATUS");
