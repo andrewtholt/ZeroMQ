@@ -1,0 +1,21 @@
+{
+	"INPUT" : {
+		"ADDRESS" : "127.0.0.1",
+		"PORT" : 1234,
+		"START" : {
+			"VALUE" : false
+		},
+		"STOP" : {
+			"VALUE" : false
+		},
+		"STATUS": "UNKNOWN"
+	},
+	"OUTPUT" : {
+		"ADDRESS" : "127.0.0.1",
+		"PORT" : 1234,
+		"MOTOR" : {
+			"VALUE" : false
+		},
+		"STATUS": "UNKNOWN"
+	}	
+}
