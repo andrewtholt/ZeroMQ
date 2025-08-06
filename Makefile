@@ -4,7 +4,7 @@ CFLAGS = -Wall -g -I.
 LDFLAGS = -lzmq
 RM = rm -f
 
-all: requester replier ps_publisher ps_subscriber jsonTest publisher
+all: requester replier ps_publisher ps_subscriber jsonTest publisher controller
 
 requester: requester.cpp
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
@@ -24,5 +24,8 @@ jsonTest: jsonTest.cpp
 publisher: publisher.cpp
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
 
+controller: controller.cpp
+	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
+
 clean:
-	$(RM) requester replier ps_publisher ps_subscriber jsonTest publisher
+	$(RM) requester replier ps_publisher ps_subscriber jsonTest publisher controller

@@ -31,6 +31,7 @@ int main (void)
         //  Send message to all subscribers
         char update [40];
         sprintf (update, "%05d %d %d", zipcode, temperature, relhumidity);
+        zmq_send (publisher, "status", 6, ZMQ_SNDMORE);
         zmq_send (publisher, update, strlen(update), 0);
         sleep(1);
     }
