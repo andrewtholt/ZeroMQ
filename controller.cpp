@@ -11,6 +11,7 @@
 #include "nlohmann/json.hpp"
 
 // for convenience
+using namespace std;
 using json = nlohmann::json;
 
 int main (int argc, char *argv [])
@@ -41,13 +42,31 @@ int main (int argc, char *argv [])
     }
     
     printf("Received message on topic: %s\n", topic);
-    
+    bool logicState = false;
+
     // Parse the JSON string
     try {
         std::string json_data(buffer, size);
         json received_json = json::parse(json_data);
         std::cout << "Successfully parsed JSON:" << std::endl;
         std::cout << received_json.dump(4) << std::endl;
+
+        // Access and print the specific value
+        if (received_json.contains("START") && received_json["START"].contains("VALUE")) {
+            bool start_value = received_json["START"]["VALUE"];
+            std::cout << "\nINPUT.START.VALUE: " << (start_value ? "true" : "false") << std::endl;
+
+            logicState = start_value;
+        }
+        if (received_json.contains("STOP") && received_json["STOP"].contains("VALUE")) {
+            bool stop_value = received_json["STOP"]["VALUE"];
+            std::cout << "\nINPUT.STOP.VALUE: " << (stop_value ? "true" : "false") << std::endl;
+
+            logicState = logicState && (!stop_value);
+        }
+
+        cout << "Result is " << logicState << endl;
+
     }
     catch (json::parse_error& e) {
         std::cerr << "Error: Failed to parse received JSON: " << e.what() << std::endl;
