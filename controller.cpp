@@ -6,6 +6,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <iostream>
+#include <string>
+#include "nlohmann/json.hpp"
+
+// for convenience
+using json = nlohmann::json;
 
 int main (int argc, char *argv [])
 {
@@ -13,39 +19,40 @@ int main (int argc, char *argv [])
     printf ("Collecting status...\n");
     void *context = zmq_ctx_new ();
     void *subscriber = zmq_socket (context, ZMQ_SUB);
-    zmq_connect (subscriber, "tcp://127.0.0.1:5556");
+    zmq_connect (subscriber, "tcp://127.0.0.1:1234");
 
-    //  Subscribe to all zipcodes by default
-//    const char *filter = (argc > 1)? argv [1]: "";
-    char string [256];
-    const char *filter ="status";
+    //  Subscribe to the INPUTS topic
+    const char *filter = "INPUTS";
     zmq_setsockopt (subscriber, ZMQ_SUBSCRIBE, filter, strlen (filter));
-    printf("Ready to receive messages...\n");
-    zmq_recv (subscriber, string, 255, 0);
-    printf("%s\n",string);
-    
-    memset(string,0,strlen(string));
-    zmq_recv (subscriber, string, 255, 0);
-    printf("%s\n",string);
+    printf("Ready to receive messages on topic '%s'...\n", filter);
 
-    /*
-    //  Process 10 updates
-    int update_nbr;
-    long total_temp = 0;
-    for (update_nbr = 0; update_nbr < 10; update_nbr++) {
-        char string [256];
-        zmq_recv (subscriber, string, 255, 0);
+    //  Receive the topic envelope
+    char topic [256];
+    zmq_recv (subscriber, topic, 255, 0);
 
-        printf("%s\n",string);
-        int zipcode, temperature, relhumidity;
-        sscanf (string, "%d %d %d",
-            &zipcode, &temperature, &relhumidity);
-        total_temp += temperature;
-
+    // Receive the JSON data
+    char buffer [256];
+    int size = zmq_recv (subscriber, buffer, 255, 0);
+    if (size == -1) {
+        perror("zmq_recv");
+        zmq_close(subscriber);
+        zmq_ctx_destroy(context);
+        return 1;
     }
-    printf ("Average temperature for zipcode '%s' was %dF\n",
-        filter, (int) (total_temp / update_nbr));
-    */
+    
+    printf("Received message on topic: %s\n", topic);
+    
+    // Parse the JSON string
+    try {
+        std::string json_data(buffer, size);
+        json received_json = json::parse(json_data);
+        std::cout << "Successfully parsed JSON:" << std::endl;
+        std::cout << received_json.dump(4) << std::endl;
+    }
+    catch (json::parse_error& e) {
+        std::cerr << "Error: Failed to parse received JSON: " << e.what() << std::endl;
+    }
+
     zmq_close (subscriber);
     zmq_ctx_destroy (context);
     return 0;
