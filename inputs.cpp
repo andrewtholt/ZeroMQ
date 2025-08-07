@@ -6,9 +6,38 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <iostream>
+#include <fstream>
+#include "nlohmann/json.hpp"
+
+// for convenience
+using json = nlohmann::json;
 
 int main (int argc, char *argv [])
 {
+    // Load and parse the configuration file
+    std::ifstream configFile("zmqConfig.json");
+    if (!configFile.is_open()) {
+        std::cerr << "Error: Could not open zmqConfig.json" << std::endl;
+        return 1;
+    }
+
+    json config;
+    try
+    {
+        configFile >> config;
+    }
+    catch (json::parse_error& e)
+    {
+        std::cerr << "Error: Failed to parse zmqConfig.json: " << e.what() << std::endl;
+        return 1;
+    }
+
+    std::cout << "Successfully loaded and parsed zmqConfig.json:" << std::endl;
+    std::cout << config.dump(4) << std::endl;
+    std::cout << "------------------------------------------------" << std::endl;
+
+
     //  Socket to talk to server
     printf ("Collecting status...\n");
     void *context = zmq_ctx_new ();
