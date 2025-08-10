@@ -46,11 +46,6 @@ int main (int argc, char *argv[])
     zmq_bind (publisher, url);
     sleep(1); //  Give subscriber time to connect
 
-    //  Send message to all subscribers
-//    char full_message[256];
-
-//    snprintf(full_message, sizeof(full_message), "%s %s", topic, message);
-
     zmq_send (publisher, topic, strlen(topic ), ZMQ_SNDMORE);
     zmq_send (publisher, message,strlen(message), 0);
 
