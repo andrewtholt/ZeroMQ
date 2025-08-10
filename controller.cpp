@@ -59,6 +59,8 @@ int main(int argc, char *argv[])
     char topic[256];
 
     bool runFlag = true;
+    void *publisher = nullptr;
+
     do
     {
 
@@ -78,7 +80,7 @@ int main(int argc, char *argv[])
         }
 
         printf("Received message on topic: %s\n", topic);
-        bool logicState = false;
+//        bool logicState = false;
 
         // Parse the JSON string
         try
@@ -107,7 +109,7 @@ int main(int argc, char *argv[])
             cout << "Result is " << boolalpha << logicState << endl;
 
             // Publish the OUTPUT section
-            void *publisher = zmq_socket(context, ZMQ_PUB);
+            publisher = zmq_socket(context, ZMQ_PUB);
             std::string pub_url = config["OUTPUT"]["URL"];
             pub_url.replace(0, 4, "tcp"); // ZMQ uses tcp, not http
             zmq_bind(publisher, pub_url.c_str());
@@ -124,8 +126,6 @@ int main(int argc, char *argv[])
             zmq_send(publisher, out_topic, strlen(out_topic), ZMQ_SNDMORE);
             zmq_send(publisher, message.c_str(), message.length(), 0);
             printf("Published OUTPUT data.\n");
-
-            zmq_close(publisher);
         }
         catch (json::parse_error &e)
         {
@@ -133,6 +133,7 @@ int main(int argc, char *argv[])
         }
     } while (runFlag);
 
+    zmq_close(publisher);
     zmq_close(subscriber);
     zmq_ctx_destroy(context);
     return 0;

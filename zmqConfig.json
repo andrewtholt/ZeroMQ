@@ -3,7 +3,7 @@
 		"URL" : "http://127.0.0.1:5557",
 
 		"START" : {
-			"VALUE" : true
+			"VALUE" : false
 		},
 		"STOP" : {
 			"VALUE" : false

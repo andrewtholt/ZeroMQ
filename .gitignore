@@ -10,3 +10,5 @@ cscope.out
 inputs
 simple_publisher
 subscriber
+.vscode
+outputs
