@@ -1,6 +1,5 @@
 //  Weather update client
 //  Connects SUB socket to tcp://localhost:5556
-//  Collects weather updates and finds avg temp in zipcode
 //  Also publishes the INPUT section of zmqConfig.json
 
 #include <zmq.h>
@@ -13,6 +12,7 @@
 #include "nlohmann/json.hpp"
 
 // for convenience
+using namespace std;
 using json = nlohmann::json;
 
 int main (int argc, char *argv [])
@@ -49,7 +49,7 @@ int main (int argc, char *argv [])
     zmq_connect (subscriber, "tcp://127.0.0.1:5556");
 
     //  Subscribe to all zipcodes by default
-    const char *filter = (argc > 1)? argv [1]: "status";
+    const char *filter = (argc > 1)? argv [1]: "STATUS";
     zmq_setsockopt (subscriber, ZMQ_SUBSCRIBE,
                          filter, strlen (filter));
     printf("Ready to receive messages...\n");
@@ -60,7 +60,7 @@ int main (int argc, char *argv [])
     // ZMQ uses tcp, not http
     pub_url.replace(0, 4, "tcp");
     zmq_bind(publisher, pub_url.c_str());
-    printf("Publishing INPUT data to %s\n", pub_url.c_str());
+//    printf("Publishing INPUT data to %s\n", pub_url.c_str());
 
 
     //  Process 10 updates
@@ -73,10 +73,11 @@ int main (int argc, char *argv [])
         // Now, publish the INPUT section of the config
         json input_data = config["INPUT"];
         std::string message = input_data.dump();
-        const char* topic = "INPUTS";
+        const char* topic = "INPUT";
 
         zmq_send(publisher, topic, strlen(topic), ZMQ_SNDMORE);
         zmq_send(publisher, message.c_str(), message.length(), 0);
+        cout << "Published topic " << topic << " Message " << message.c_str() << endl ;
         printf("Published INPUT data.\n");
 //    }
 

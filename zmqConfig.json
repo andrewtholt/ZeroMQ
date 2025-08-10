@@ -1,9 +1,9 @@
 {
 	"INPUT" : {
-		"URL" : "http://127.0.0.1:1234",
+		"URL" : "http://127.0.0.1:5557",
 
 		"START" : {
-			"VALUE" : false
+			"VALUE" : true
 		},
 		"STOP" : {
 			"VALUE" : false
@@ -11,7 +11,7 @@
 		"STATUS": "UNKNOWN"
 	},
 	"OUTPUT" : {
-		"URL" : "http://127.0.0.1:1235",
+		"URL" : "http://127.0.0.1:5558",
 
 		"MOTOR" : {
 			"VALUE" : false

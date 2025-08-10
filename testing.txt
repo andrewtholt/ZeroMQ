@@ -1,0 +1,20 @@
+To test the full communication pipeline, follow these steps:
+
+1. Open four separate terminal windows.
+
+2. In the first terminal, run the 'subscriber' executable, listening for the final output:
+   ./subscriber -u "tcp://localhost:5558" -t OUTPUT
+
+3. In the second terminal, run the 'inputs' executable:
+   ./inputs
+
+4. In the third terminal, run the 'controller' executable:
+   ./controller
+
+5. In the fourth terminal, run the 'publisher' executable to kick off the process:
+   ./publisher -u "tcp://*:5556" -t STATUS -m "START"
+
+After running the final publisher command, you should see a chain reaction:
+- The 'inputs' terminal will show it received the 'START' message.
+- The 'controller' terminal will show it received the JSON from 'inputs'.
+- The 'subscriber' terminal will show the final JSON output from the 'controller'.
