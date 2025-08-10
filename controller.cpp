@@ -16,14 +16,15 @@
 using namespace std;
 using json = nlohmann::json;
 
-int main (int argc, char *argv [])
+int main(int argc, char *argv[])
 {
 
-    cout << "Loading template json." << endl;   
+    cout << "Loading template json." << endl;
     // Load and parse the configuration file
     ifstream configFile("zmqConfig.json");
 
-    if (!configFile.is_open()) {
+    if (!configFile.is_open())
+    {
         std::cerr << "Error: Could not open zmqConfig.json" << std::endl;
         return 1;
     }
@@ -33,7 +34,7 @@ int main (int argc, char *argv [])
     {
         configFile >> config;
     }
-    catch (json::parse_error& e)
+    catch (json::parse_error &e)
     {
         std::cerr << "Error: Failed to parse zmqConfig.json: " << e.what() << std::endl;
         return 1;
@@ -44,83 +45,95 @@ int main (int argc, char *argv [])
     std::cout << "------------------------------------------------" << std::endl;
 
     //  Socket to talk to server
-    printf ("Collecting status...\n");
-    void *context = zmq_ctx_new ();
-    void *subscriber = zmq_socket (context, ZMQ_SUB);
-    zmq_connect (subscriber, "tcp://127.0.0.1:5557");
+    printf("Collecting status...\n");
+    void *context = zmq_ctx_new();
+    void *subscriber = zmq_socket(context, ZMQ_SUB);
+    zmq_connect(subscriber, "tcp://127.0.0.1:5557");
 
     //  Subscribe to the INPUTS topic
     const char *filter = "INPUT";
-    zmq_setsockopt (subscriber, ZMQ_SUBSCRIBE, filter, strlen (filter));
+    zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, filter, strlen(filter));
     printf("Ready to receive messages on topic '%s'...\n", filter);
 
     //  Receive the topic envelope
-    char topic [256];
-    zmq_recv (subscriber, topic, 255, 0);
+    char topic[256];
 
-    // Receive the JSON data
-    char buffer [256];
-    int size = zmq_recv (subscriber, buffer, 255, 0);
-    if (size == -1) {
-        perror("zmq_recv");
-        zmq_close(subscriber);
-        zmq_ctx_destroy(context);
-        return 1;
-    }
-    
-    printf("Received message on topic: %s\n", topic);
-    bool logicState = false;
+    bool runFlag = true;
+    do
+    {
 
-    // Parse the JSON string
-    try {
-        std::string json_data(buffer, size);
-        json received_json = json::parse(json_data);
-        std::cout << "Successfully parsed JSON:" << std::endl;
-        std::cout << received_json.dump(4) << std::endl;
+        memset(topic, 0, sizeof(topic)); // Clear the buffer
 
-        // Access and print the specific value
-        if (received_json.contains("START") && received_json["START"].contains("VALUE")) {
-            bool start_value = received_json["START"]["VALUE"];
-            std::cout << "\nINPUT.START.VALUE: " << (start_value ? "true" : "false") << std::endl;
+        zmq_recv(subscriber, topic, 255, 0);
 
-            logicState = start_value;
-        }
-        if (received_json.contains("STOP") && received_json["STOP"].contains("VALUE")) {
-            bool stop_value = received_json["STOP"]["VALUE"];
-            std::cout << "\nINPUT.STOP.VALUE: " << (stop_value ? "true" : "false") << std::endl;
-
-            logicState = logicState && (!stop_value);
+        // Receive the JSON data
+        char buffer[256];
+        int size = zmq_recv(subscriber, buffer, 255, 0);
+        if (size == -1)
+        {
+            perror("zmq_recv");
+            zmq_close(subscriber);
+            zmq_ctx_destroy(context);
+            return 1;
         }
 
-        cout << "Result is " << boolalpha << logicState << endl;
+        printf("Received message on topic: %s\n", topic);
+        bool logicState = false;
 
-        // Publish the OUTPUT section
-        void *publisher = zmq_socket(context, ZMQ_PUB);
-        std::string pub_url = config["OUTPUT"]["URL"];
-        pub_url.replace(0, 4, "tcp"); // ZMQ uses tcp, not http
-        zmq_bind(publisher, pub_url.c_str());
-        sleep(2); // Give subscriber time to connect
-        printf("Publishing OUTPUT data to %s\n", pub_url.c_str());
+        // Parse the JSON string
+        try
+        {
+            std::string json_data(buffer, size);
+            json received_json = json::parse(json_data);
+            std::cout << "Successfully parsed JSON:" << std::endl;
+            std::cout << received_json.dump(4) << std::endl;
 
-        json output_data = config["OUTPUT"];
-        output_data["MOTOR"]["VALUE"] = logicState;
-        std::string message = output_data.dump();
-        const char* out_topic = "OUTPUT";
+            // Access and print the specific value
+            if (received_json.contains("START") && received_json["START"].contains("VALUE"))
+            {
+                bool start_value = received_json["START"]["VALUE"];
+                std::cout << "\nINPUT.START.VALUE: " << (start_value ? "true" : "false") << std::endl;
 
-        cout << "Publishing topic " << out_topic << " Message " << message.c_str() << endl;
+                logicState = start_value;
+            }
+            if (received_json.contains("STOP") && received_json["STOP"].contains("VALUE"))
+            {
+                bool stop_value = received_json["STOP"]["VALUE"];
+                std::cout << "\nINPUT.STOP.VALUE: " << (stop_value ? "true" : "false") << std::endl;
 
-        zmq_send(publisher, out_topic, strlen(out_topic), ZMQ_SNDMORE);
-        zmq_send(publisher, message.c_str(), message.length(), 0);
-        printf("Published OUTPUT data.\n");
+                logicState = logicState && (!stop_value);
+            }
 
-        zmq_close(publisher);
+            cout << "Result is " << boolalpha << logicState << endl;
 
-    }
-    catch (json::parse_error& e) {
-        std::cerr << "Error: Failed to parse received JSON: " << e.what() << std::endl;
-    }
+            // Publish the OUTPUT section
+            void *publisher = zmq_socket(context, ZMQ_PUB);
+            std::string pub_url = config["OUTPUT"]["URL"];
+            pub_url.replace(0, 4, "tcp"); // ZMQ uses tcp, not http
+            zmq_bind(publisher, pub_url.c_str());
+            sleep(2); // Give subscriber time to connect
+            printf("Publishing OUTPUT data to %s\n", pub_url.c_str());
 
-    zmq_close (subscriber);
-    zmq_ctx_destroy (context);
+            json output_data = config["OUTPUT"];
+            output_data["MOTOR"]["VALUE"] = logicState;
+            std::string message = output_data.dump();
+            const char *out_topic = "OUTPUT";
+
+            cout << "Publishing topic " << out_topic << " Message " << message.c_str() << endl;
+
+            zmq_send(publisher, out_topic, strlen(out_topic), ZMQ_SNDMORE);
+            zmq_send(publisher, message.c_str(), message.length(), 0);
+            printf("Published OUTPUT data.\n");
+
+            zmq_close(publisher);
+        }
+        catch (json::parse_error &e)
+        {
+            std::cerr << "Error: Failed to parse received JSON: " << e.what() << std::endl;
+        }
+    } while (runFlag);
+
+    zmq_close(subscriber);
+    zmq_ctx_destroy(context);
     return 0;
 }
